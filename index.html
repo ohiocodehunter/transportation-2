@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TravelEase - Modern Travel Booking</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        :root {
+            --primary: #2563eb;
+            --secondary: #1e40af;
+            --background: #f8fafc;
+            --text: #1e293b;
+        }
+
+        body {
+            background-color: var(--background);
+            color: var(--text);
+        }
+
+        nav {
+            background: white;
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            position: fixed;
+            width: 100%;
+            z-index: 100;
+        }
+
+        .nav-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--primary);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: var(--text);
+            font-weight: 500;
+        }
+
+        .hero {
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+            padding: 2rem;
+        }
+
+        #heroCanvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 1;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            max-width: 1200px;
+            width: 100%;
+            text-align: center;
+            padding: 2rem;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+        }
+
+        .search-container {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .search-box {
+            padding: 1rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            min-width: 200px;
+            background: white;
+        }
+
+        .search-box label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        .search-box input,
+        .search-box select {
+            width: 100%;
+            padding: 0.5rem;
+            border: none;
+            outline: none;
+            font-size: 1rem;
+        }
+
+        .search-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background 0.3s ease;
+        }
+
+        .search-btn:hover {
+            background: var(--secondary);
+        }
+
+        .transport-options {
+            display: flex;
+            gap: 2rem;
+            padding: 4rem 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+            flex-wrap: wrap;
+        }
+
+        .transport-card {
+            flex: 1;
+            min-width: 300px;
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            transition: transform 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .transport-card:hover {
+            transform: translateY(-10px);
+        }
+
+        .card-img {
+            height: 200px;
+            background-size: cover;
+            background-position: center;
+        }
+
+        .card-content {
+            padding: 1.5rem;
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .card-price {
+            color: var(--primary);
+            font-weight: 600;
+            font-size: 1.5rem;
+        }
+
+        .features {
+            padding: 4rem 2rem;
+            background: white;
+        }
+
+        .features-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .feature-item {
+            padding: 2rem;
+            background: var(--background);
+            border-radius: 15px;
+            transition: transform 0.3s ease;
+        }
+
+        .feature-item:hover {
+            transform: translateY(-5px);
+        }
+
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+
+            .search-container {
+                flex-direction: column;
+            }
+
+            .search-box {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="nav-content">
+            <div class="logo">TravelEase</div>
+            <div class="nav-links">
+                <a href="#flights">Flights</a>
+                <a href="#buses">Buses</a>
+                <a href="#cars">Cars</a>
+                <a href="#contact">Contact</a>
+            </div>
+        </div>
+    </nav>
+
+    <section class="hero">
+        <canvas id="heroCanvas"></canvas>
+        <div class="hero-content">
+            <h1 style="font-size: 2.5rem; margin-bottom: 1rem;">Book Your Journey</h1>
+            <p style="font-size: 1.2rem; color: #64748b; margin-bottom: 2rem;">Find the best deals on flights, buses, and car rentals</p>
+            
+            <div class="search-container">
+                <div class="search-box">
+                    <label>From</label>
+                    <input type="text" placeholder="Departure city">
+                </div>
+                <div class="search-box">
+                    <label>To</label>
+                    <input type="text" placeholder="Destination city">
+                </div>
+                <div class="search-box">
+                    <label>Date</label>
+                    <input type="date">
+                </div>
+                <div class="search-box">
+                    <label>Transport Type</label>
+                    <select>
+                        <option>Flight</option>
+                        <option>Bus</option>
+                        <option>Car</option>
+                    </select>
+                </div>
+                <button class="search-btn">Search</button>
+            </div>
+        </div>
+    </section>
+
+    <section class="transport-options">
+        <div class="transport-card">
+            <div class="card-img" style="background-image: url('/api/placeholder/400/320')"></div>
+            <div class="card-content">
+                <h3 class="card-title">First Class Flights</h3>
+                <p>Experience luxury in the skies with our premium flight options.</p>
+                <p class="card-price">From $299</p>
+            </div>
+        </div>
+        <div class="transport-card">
+            <div class="card-img" style="background-image: url('/api/placeholder/400/320')"></div>
+            <div class="card-content">
+                <h3 class="card-title">Luxury Buses</h3>
+                <p>Comfortable long-distance travel with modern amenities.</p>
+                <p class="card-price">From $49</p>
+            </div>
+        </div>
+        <div class="transport-card">
+            <div class="card-img" style="background-image: url('/api/placeholder/400/320')"></div>
+            <div class="card-content">
+                <h3 class="card-title">Premium Car Rentals</h3>
+                <p>Drive in style with our selection of premium vehicles.</p>
+                <p class="card-price">From $99/day</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="features">
+        <div class="features-content">
+            <h2 style="font-size: 2rem; margin-bottom: 1rem;">Why Choose Us</h2>
+            <div class="features-grid">
+                <div class="feature-item">
+                    <h3>24/7 Support</h3>
+                    <p>Round-the-clock customer service for your peace of mind.</p>
+                </div>
+                <div class="feature-item">
+                    <h3>Best Prices</h3>
+                    <p>Guaranteed best rates and regular promotional offers.</p>
+                </div>
+                <div class="feature-item">
+                    <h3>Secure Booking</h3>
+                    <p>Safe and secure payment processing.</p>
+                </div>
+                <div class="feature-item">
+                    <h3>Flexible Changes</h3>
+                    <p>Easy modification and cancellation options.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        // 3D Background Animation
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('heroCanvas'), alpha: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+
+        // Create animated background with particles
+        const particles = [];
+        const particleCount = 100;
+        const particleGeometry = new THREE.SphereGeometry(0.1, 8, 8);
+        const particleMaterial = new THREE.MeshBasicMaterial({ color: 0x2563eb });
+
+        for (let i = 0; i < particleCount; i++) {
+            const particle = new THREE.Mesh(particleGeometry, particleMaterial);
+            particle.position.x = Math.random() * 40 - 20;
+            particle.position.y = Math.random() * 40 - 20;
+            particle.position.z = Math.random() * 40 - 20;
+            particles.push(particle);
+            scene.add(particle);
+        }
+
+        camera.position.z = 5;
+
+        function animate() {
+            requestAnimationFrame(animate);
+
+            particles.forEach(particle => {
+                particle.rotation.x += 0.01;
+                particle.rotation.y += 0.01;
+                particle.position.y += Math.sin(Date.now() * 0.001) * 0.02;
+            });
+
+            renderer.render(scene, camera);
+        }
+
+        animate();
+
+        // Resize handler
+        window.addEventListener('resize', () => {
+            const width = window.innerWidth;
+            const height = window.innerHeight;
+            
+            camera.aspect = width / height;
+            camera.updateProjectionMatrix();
+            
+            renderer.setSize(width, height);
+        });
+
+        // Simple form validation
+        document.querySelector('.search-btn').addEventListener('click', function(e) {
+            e.preventDefault();
+            const inputs = document.querySelectorAll('input');
+            let isValid = true;
+            
+            inputs.forEach(input => {
+                if(!input.value) {
+                    isValid = false;
+                    input.style.border = '1px solid red';
+                } else {
+                    input.style.border = 'none';
+                }
+            });
+
+            if(isValid) {
+                alert('Searching for available options...');
+                // Here you would typically make an API call to your backend
+            }
+        });
+    </script>
+</body>
+</html>
